@@ -11,7 +11,7 @@ var mongoose = require('mongoose');
 var cheerio = require('cheerio');
 
 // Database configuration with mongoose  (this is where mongo URI goes)
-mongoose.connect('mongodb://heroku_pvzdghgl:7ksb7uqr7nv73b2dc5pkgc0sul@ds013456.mlab.com:13456/heroku_pvzdghgl');
+mongoose.connect('mongodb://localhost/scrapeDB' || 'mongodb://heroku_pvzdghgl:7ksb7uqr7nv73b2dc5pkgc0sul@ds013456.mlab.com:13456/heroku_pvzdghgl');
 var db = mongoose.connection;
 
 // Show any mongoose errors
@@ -31,28 +31,29 @@ router.get('/', function(req, res) {
 
 // Route using site and cheerio
 router.get('/home', function(req, res) {
-  request('http://www.thehackernews.com/', function(error, response, html) {
-    var $ = cheerio.load(html);
-    $('article h2').each(function(i, element) {
+  	request('http://www.thehackernews.com/', function(error, response, html) {
+	    var $ = cheerio.load(html);
+	    $('article h2').each(function(i, element) {
 
-				var result = {};
+			var result = {};
 
-				result.title = $(this).children('a').text();
-				result.link = $(this).children('a').attr('href');
+			result.title = $(this).children('a').text();
+			result.link = $(this).children('a').attr('href');
+			console.log(result);
 
-				var entry = new Article (result);
+			var entry = new Article (result);
 
-				entry.save(function(err, doc) {
-				  if (err) {
-				    console.log(err);
-				  } else {
-				    console.log(doc);
-				  }
-				});
+			entry.save(function(err, doc) {
+			  if (err) {
+			    console.log(err);
+			  } else {
+			    console.log(doc);
+			  }
 			});
-		});	
-		res.render('home');
-	});		
+		});
+	});	
+	res.render('home');
+});		
 
 // Route to see articles saved
 router.get('/articles', function(req, res) {
@@ -60,7 +61,7 @@ router.get('/articles', function(req, res) {
 		if (err) {
 			console.log(err);
 		} else {
-			res.json(doc);
+			res.json(doc); //this is where json is displayed
 		}
 	});
 });
@@ -121,3 +122,6 @@ module.exports = router;
 
 // MONGODB URI for documentation
 // 'mongodb://heroku_pvzdghgl:7ksb7uqr7nv73b2dc5pkgc0sul@ds013456.mlab.com:13456/heroku_pvzdghgl'
+
+//home route, take what get from mongo and render that with home template. in home template, need to have an {(#each article)} <br> {(this.title)} , and then render and send it
+// in home within articles div
